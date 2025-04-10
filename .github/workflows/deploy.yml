@@ -23,18 +23,26 @@ jobs:
           ls -la target/
 
       - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}
-
-      - name: Copy files to EC2 and deploy
         run: |
-          JAR_FILE=$(ls target/*.jar)
-          echo "Deploying JAR file: $JAR_FILE"
+          # Create .ssh directory
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
 
-          scp -o StrictHostKeyChecking=no $JAR_FILE ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/wodcrmapi.jar
-          scp -o StrictHostKeyChecking=no src/main/resources/application.properties ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
-        
-          # Execute deployment script
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} "chmod +x deploy.sh && ./deploy.sh"
+          # Write the private key
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Add EC2 to known hosts
+          ssh-keyscan ${{ secrets.AWS_EC2_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          # Find the JAR file
+          JAR_FILE=$(ls target/*.jar)
+
+          # Copy files with verbose logging
+          scp -v -i ~/.ssh/id_rsa $JAR_FILE ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
+          scp -v -i ~/.ssh/id_rsa src/main/resources/application.properties ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
+
+          # Run deployment script
+          ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_IP }} "chmod +x deploy.sh && ./deploy.sh"
