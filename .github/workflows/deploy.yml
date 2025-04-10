@@ -37,12 +37,35 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          # Find the JAR file
-          JAR_FILE=$(ls target/*.jar)
+          # Debug: Show files being deployed
+          echo "Files to deploy:"
+          ls -la target/*.jar
+          ls -la deploy.sh
+          ls -la src/main/resources/application.properties
 
-          # Copy files with verbose logging
-          scp -v -i ~/.ssh/id_rsa $JAR_FILE ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
+          # Copy all necessary files
+          scp -v -i ~/.ssh/id_rsa target/wodcrmapi-*.jar ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/wodcrmapi.jar
           scp -v -i ~/.ssh/id_rsa src/main/resources/application.properties ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
+          scp -v -i ~/.ssh/id_rsa deploy.sh ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
 
-          # Run deployment script
-          ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_IP }} "chmod +x deploy.sh && ./deploy.sh"
+          # Verify files on server
+          ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_IP }} "
+            echo 'Files on server:';
+            ls -la /home/ubuntu/;
+            cat /home/ubuntu/deploy.sh;
+            chmod +x /home/ubuntu/deploy.sh
+          "
+
+          # Execute deployment
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_IP }} "/home/ubuntu/deploy.sh"
+
+      - name: Verify deployment
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_IP }} "
+          echo 'Deployment log:';
+          cat /home/ubuntu/deploy.log;
+          echo 'Application log tail:';
+          tail -n 20 /home/ubuntu/app.log;
+          echo 'Running processes:';
+          pgrep -f 'java -jar' || echo 'No Java process running'
+          "
