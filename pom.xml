@@ -105,6 +105,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>wodcrmapi</finalName>
 		<pluginManagement>
 			<plugins>
 				<!-- Compiler Plugin for Lombok -->
@@ -126,17 +127,17 @@
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
-					<executions>
-						<execution>
-							<id>repackage</id>
-							<goals>
-								<goal>repackage</goal>
-							</goals>
-							<configuration>
-								<skip>true</skip>
-							</configuration>
-						</execution>
-					</executions>
+<!--					<executions>-->
+<!--						<execution>-->
+<!--							<id>repackage</id>-->
+<!--							<goals>-->
+<!--								<goal>repackage</goal>-->
+<!--							</goals>-->
+<!--							<configuration>-->
+<!--								<skip>true</skip>-->
+<!--							</configuration>-->
+<!--						</execution>-->
+<!--					</executions>-->
 					<configuration>
 						<!-- Exclude Lombok from repackaging -->
 						<excludes>
