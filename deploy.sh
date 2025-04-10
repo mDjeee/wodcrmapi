@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Stop any existing Spring Boot app
-pkill -f "java -jar wodcrmapi.jar"
+# Stop any existing running application
+pkill -f "java -jar wodcrmapi.*.jar" || true
 
-# Remove old files
+# Remove old files (if they exist)
 rm -f /home/ubuntu/wodcrmapi.jar
 rm -f /home/ubuntu/application.properties
 
-# Copy new files
-cp target/wodcrmapi.jar /home/ubuntu/
-cp src/main/resources/application.properties /home/ubuntu/
+# Move new files to proper location
+mv /home/ubuntu/wodcrmapi-*.jar /home/ubuntu/wodcrmapi.jar
+cp /home/ubuntu/application.properties /home/ubuntu/  # If needed
 
 # Start the application
-nohup java -jar /home/ubuntu/wodcrmapi.jar --spring.config.location=/home/ubuntu/application.properties > /home/ubuntu/app.log 2>&1 &
+nohup java -jar /home/ubuntu/wodcrmapi.jar > /home/ubuntu/app.log 2>&1 &
