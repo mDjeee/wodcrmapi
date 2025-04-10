@@ -18,7 +18,9 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
-        run: mvn clean package -X -DskipTests
+        run:  |
+          mvn clean package -X -DskipTests
+          ls -la target/
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
@@ -28,6 +30,11 @@ jobs:
 
       - name: Copy files to EC2 and deploy
         run: |
-          scp -o StrictHostKeyChecking=no target/wodcrmapi.jar ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
+          JAR_FILE=$(ls target/*.jar)
+          echo "Deploying JAR file: $JAR_FILE"
+
+          scp -o StrictHostKeyChecking=no $JAR_FILE ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/wodcrmapi.jar
           scp -o StrictHostKeyChecking=no src/main/resources/application.properties ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
+        
+          # Execute deployment script
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} "chmod +x deploy.sh && ./deploy.sh"
