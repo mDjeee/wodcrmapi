@@ -18,7 +18,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: mvn clean package -X -DskipTests
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
