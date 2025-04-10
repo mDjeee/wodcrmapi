@@ -1,0 +1,33 @@
+name: Deploy Spring Boot to AWS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: Copy files to EC2 and deploy
+        run: |
+          scp -o StrictHostKeyChecking=no target/wodcrmapi.jar ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no src/main/resources/application.properties ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} "chmod +x deploy.sh && ./deploy.sh"

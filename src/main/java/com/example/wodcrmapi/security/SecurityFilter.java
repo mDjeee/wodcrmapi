@@ -1,8 +1,12 @@
 package com.example.wodcrmapi.security;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
+import com.example.wodcrmapi.entity.User;
+import com.example.wodcrmapi.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,11 +29,11 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private final JWTUtil util;
 
-    private final UserDetailsService userDetailsService;
+    private final UserService userSevrice;
 
-    public SecurityFilter(JWTUtil util, UserDetailsService userDetailsService) {
+    public SecurityFilter(JWTUtil util, UserService userSevrice) {
         this.util = util;
-        this.userDetailsService = userDetailsService;
+        this.userSevrice = userSevrice;
     }
 
     @Override
@@ -35,23 +41,33 @@ public class SecurityFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         // Reading Token from Authorization Header
-        String token= request.getHeader("Authorization");
-        if(token !=null) {
-            String username= util.getSubject(token);
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader != null && !request.getRequestURI().contains("/auth/")) {
+            String token = authHeader.replace("Bearer ", "");
+            String username = util.getSubject(token);
             //if username is not null & Context Authentication must be null
-            if(username !=null && SecurityContextHolder.getContext().getAuthentication()==null) {
-                UserDetails user= userDetailsService.loadUserByUsername(username);
-                boolean isValid=util.isValidToken(token, user.getUsername());
+            if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                boolean isValid = util.isValidToken(token, username);
                 if(isValid) {
-                    UsernamePasswordAuthenticationToken authToken=
-                            new UsernamePasswordAuthenticationToken(username, user.getPassword(), user.getAuthorities());
+                    User user = userSevrice.getUserByUserName(username);
+                    UsernamePasswordAuthenticationToken authToken = getUsernamePasswordAuthenticationToken(user);
+
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-
                 }
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private static UsernamePasswordAuthenticationToken getUsernamePasswordAuthenticationToken(User user) {
+        UserPrincipal principal = new UserPrincipal(user);
+
+        return new UsernamePasswordAuthenticationToken(
+                principal,
+                user.getPassword(),
+                principal.getAuthorities()
+        );
     }
 
 }

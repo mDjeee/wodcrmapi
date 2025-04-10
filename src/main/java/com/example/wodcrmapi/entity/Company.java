@@ -32,6 +32,12 @@ public class Company {
     @Column(unique = true, nullable = false)
     private String domain;
 
+    @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false)
+    private String phone;
+
     @Column(name = "subscription_start_date")
     private LocalDate subscriptionStartDate;
 

@@ -11,4 +11,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findByDomain(String domain);
     List<Company> findBySubscriptionEndDateBetween(LocalDate start, LocalDate end);
     List<Company> findBySubscriptionEndDateBeforeAndActiveTrue(LocalDate date);
+
+    boolean existsByName(String name);
 }

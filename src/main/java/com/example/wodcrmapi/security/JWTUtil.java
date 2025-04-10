@@ -47,7 +47,7 @@ public class JWTUtil {
     }
 
     // code to check if token is valid as per username
-    public boolean isValidToken(String token,String username) {
+    public boolean isValidToken(String token, String username) {
         String tokenUserName=getSubject(token);
         return (username.equals(tokenUserName) && !isTokenExpired(token));
     }

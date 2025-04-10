@@ -2,9 +2,9 @@ package com.example.wodcrmapi.service;
 
 import com.example.wodcrmapi.dto.request.CreateUserRequest;
 import com.example.wodcrmapi.entity.User;
-import com.example.wodcrmapi.exception.AppException;
 import com.example.wodcrmapi.repository.CompanyUserRepository;
 import com.example.wodcrmapi.repository.UserRepository;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -14,21 +14,19 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final CompanyUserRepository companyUserRepository;
     private final ModelMapper modelMapper;
 
     public UserService(UserRepository userRepository,
                        CompanyUserRepository companyUserRepository,
                        ModelMapper modelMapper) {
         this.userRepository = userRepository;
-        this.companyUserRepository = companyUserRepository;
         this.modelMapper = modelMapper;
     }
 
-    public User createUser(CreateUserRequest request) {
+    public User createUser(CreateUserRequest request) throws BadRequestException {
         Boolean isExists = userRepository.existsByUsername(request.getUsername());
         if(isExists) {
-            throw new AppException("Username already exists");
+            throw new BadRequestException("Username already exists");
         }
         User user = userRepository.save(modelMapper.map(request, User.class));
         return userRepository.save(user);
@@ -36,6 +34,10 @@ public class UserService {
 
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);
+    }
+
+    public User getUserByUserName(String username) {
+        return userRepository.findByUsername(username).orElse(null);
     }
 
     public List<User> getAllUsers() {

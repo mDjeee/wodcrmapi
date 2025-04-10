@@ -3,6 +3,7 @@ package com.example.wodcrmapi.controller;
 import com.example.wodcrmapi.dto.request.CreateUserRequest;
 import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.service.UserService;
+import org.apache.coyote.BadRequestException;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,7 +28,7 @@ public class UserController {
 
     @PostMapping
     @Operation(summary = "Create a new user", description = "Adds a new user")
-    public User createUser(@RequestBody CreateUserRequest user) {
+    public User createUser(@RequestBody CreateUserRequest user) throws BadRequestException {
         return userService.createUser(user);
     }
 

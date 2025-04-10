@@ -59,13 +59,13 @@ public class SecurityConfig {
                 }))
                 .csrf(AbstractHttpConfigurer::disable) // keep CSRF disabled for APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/auth/**"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("APPLICATION_OWNER")
                         .requestMatchers("/company/**").hasRole("COMPANY_ADMIN")
