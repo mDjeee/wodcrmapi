@@ -21,9 +21,7 @@ services:
     restart: unless-stopped
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${IMAGE_TAG}
     ports:
       - "8080:8080"
     depends_on:

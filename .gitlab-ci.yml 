@@ -6,30 +6,43 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
-  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
 
 build:
+  stage: build
+  image: maven:3.8.6-eclipse-temurin-17
+  script:
+      - mvn clean package -DskipTests
+  artifacts:
+      paths:
+        - target/*.jar
+
+docker-build:
   stage: build
   image: docker:latest
   services:
     - docker:dind
   script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
 
 deploy:
   stage: deploy
-  image: alpine:latest
+  image: ubuntu:24.04
   before_script:
-    - apk add --no-cache openssh
+    - apt-get update -qq && apt-get install -y -qq openssh-client rsync
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H $EC2_IP >> ~/.ssh/known_hosts
   script:
-    - echo "$SSH_PRIVATE_KEY" > key.pem
-    - chmod 600 key.pem
-    - ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@16.170.242.6 "
-        cd /home/ubuntu/wodcrmapi &&
-        git pull &&
-        docker-compose down &&
-        docker-compose build &&
+      - ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP << EOF
+        docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        docker pull $IMAGE_TAG
+        docker-compose down
         docker-compose up -d
+        EOF
       "
   only:
     - main
