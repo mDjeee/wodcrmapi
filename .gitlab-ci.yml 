@@ -10,30 +10,26 @@ variables:
 
 build:
   stage: build
-  image: docker:20.10.16
+  image: docker:latest
   services:
-    - docker:20.10.16-dind
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker:dind
   script:
     - docker build -t $IMAGE_TAG .
-    - docker push $IMAGE_TAG
 
 deploy:
   stage: deploy
-  image: ubuntu:24.04
+  image: alpine:latest
   before_script:
-    - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
+    - apk add --no-cache openssh
   script:
-    - ssh ubuntu@$SERVER_IP "cd /home/ubuntu && docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
-    - ssh ubuntu@$SERVER_IP "cd /home/ubuntu && docker pull $IMAGE_TAG"
-    - ssh ubuntu@$SERVER_IP "cd /home/ubuntu && docker-compose down"
-    - ssh ubuntu@$SERVER_IP "cd /home/ubuntu && IMAGE_TAG=$IMAGE_TAG docker-compose up -d"
+    - echo "$SSH_PRIVATE_KEY" > key.pem
+    - chmod 600 key.pem
+    - ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@16.170.242.6 "
+        cd /home/ubuntu/wodcrmapi &&
+        git pull &&
+        docker-compose down &&
+        docker-compose build &&
+        docker-compose up -d
+      "
   only:
     - main
