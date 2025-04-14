@@ -5,6 +5,7 @@ import com.example.wodcrmapi.dto.response.CustomUserDetails;
 import com.example.wodcrmapi.dto.response.JwtAuthenticationResponse;
 import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
+import com.example.wodcrmapi.exception.PasswordMismatchException;
 import com.example.wodcrmapi.security.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,10 +26,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     public ResponseEntity<?> login(LoginRequest request) {
-        log.info("Attempting login for user: {}", request.getUsername());
-        
         try {
             
             User user = userService.findByUsername(request.getUsername());
@@ -33,7 +36,10 @@ public class AuthService {
                 throw new NotFoundException("Пользователь не найден.");
             }
 
-            log.info("Login successful for user: {}", request.getUsername());
+            if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                throw new PasswordMismatchException("Неверный пароль!");
+            }
+
             CustomUserDetails userDetails = new CustomUserDetails(
                     user.getUsername(),
                     user.getFirstName(),
@@ -46,7 +52,11 @@ public class AuthService {
             String token = jwtUtil.generateToken(request.getUsername());
 
             return ResponseEntity.ok(new JwtAuthenticationResponse(token, userDetails));
-        } catch (BadCredentialsException e) {
+        }
+        catch (PasswordMismatchException e) {
+            throw e;
+        }
+        catch (BadCredentialsException e) {
             throw new BadCredentialsException("Неверные учетные данные.");
         }
     }
