@@ -1,10 +1,12 @@
 package com.example.wodcrmapi.controller;
 
 import com.example.wodcrmapi.aop.CheckPermission;
+import com.example.wodcrmapi.dto.request.CreateClientRequest;
 import com.example.wodcrmapi.entity.Client;
 import com.example.wodcrmapi.service.ClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,8 +43,8 @@ public class ClientController {
     @PostMapping
     @CheckPermission(value = "CLIENT:CREATE", description = "Create client", displayName = "Добавление клиента")
     @Operation(summary = "Create a new client", description = "Adds a new client")
-    public Client create(@RequestBody Client Client) {
-        return service.createClient(Client);
+    public Client create(@RequestBody CreateClientRequest request) throws BadRequestException {
+        return service.createClient(request);
     }
 
     @PutMapping("/{id}")

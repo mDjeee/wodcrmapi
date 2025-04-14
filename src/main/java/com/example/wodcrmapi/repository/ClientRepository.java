@@ -13,4 +13,5 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Optional<Client> findByIdAndCompanyId(Long id, Long companyId);
     List<Client> findBySubscriptionEndDateBetweenAndActiveTrue(LocalDate start, LocalDate end);
     List<Client> findBySubscriptionEndDateBeforeAndActiveTrue(LocalDate date);
+    Boolean existsClientByPhone(String phoneNumber);
 }

@@ -1,5 +1,6 @@
 package com.example.wodcrmapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -49,6 +50,7 @@ public class Company {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
+    @JsonIgnoreProperties({"password", "createdAt", "updatedAt", "roles"})
     private User createdBy;
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)

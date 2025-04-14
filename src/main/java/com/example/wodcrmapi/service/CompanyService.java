@@ -6,11 +6,8 @@ import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
 import com.example.wodcrmapi.repository.CompanyRepository;
 import com.example.wodcrmapi.security.SecurityUtils;
-import com.example.wodcrmapi.security.UserPrincipal;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +36,7 @@ public class CompanyService {
 
         Company company = modelMapper.map(request, Company.class);
         company.setCreatedBy(currentUser);
+
         return companyRepository.save(company);
     }
 

@@ -1,7 +1,12 @@
 package com.example.wodcrmapi.service;
 
+import com.example.wodcrmapi.dto.request.CreateClientRequest;
 import com.example.wodcrmapi.entity.Client;
+import com.example.wodcrmapi.entity.Company;
+import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.repository.ClientRepository;
+import com.example.wodcrmapi.security.SecurityUtils;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +16,17 @@ import java.util.Optional;
 public class ClientService {
 
     private final ClientRepository repo;
+    private final CompanyService companyService;
+    private SecurityUtils securityUtils;
 
-    public ClientService(ClientRepository repo) {
+    public ClientService(
+            ClientRepository repo,
+            CompanyService companyService,
+            SecurityUtils securityUtils
+    ) {
         this.repo = repo;
+        this.companyService = companyService;
+        this.securityUtils = securityUtils;
     }
 
     public List<Client> getAllClients() {
@@ -24,8 +37,36 @@ public class ClientService {
         return repo.findById(id);
     }
 
-    public Client createClient(Client Client) {
-        return repo.save(Client);
+    public Client createClient(CreateClientRequest request) throws BadRequestException {
+        Boolean clientExists = repo.existsClientByPhone(request.getPhone());
+
+        if(clientExists) {
+            throw new BadRequestException(
+                    String.format("Клиент с номером %s уже существует", request.getPhone())
+            );
+        }
+
+        Client client = new Client();
+
+        client.setPhone(request.getPhone());
+        client.setEmail(request.getEmail());
+        client.setFirstName(request.getFirstName());
+        client.setLastName(request.getLastName());
+
+        Company company = companyService.getCompanyById(request.getCompanyId());
+
+        if(company == null) {
+            throw new BadRequestException(
+                    String.format("Компании с ID %s не существует", request.getCompanyId())
+            );
+        } else {
+            client.setCompany(company);
+        }
+
+        User currentUser = securityUtils.getCurrentUser();
+        client.setCreatedBy(currentUser);
+
+        return repo.save(client);
     }
 
     public Client updateClient(Long id, Client newClient) {

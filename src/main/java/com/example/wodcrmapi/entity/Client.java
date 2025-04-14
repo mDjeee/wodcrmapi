@@ -1,5 +1,6 @@
 package com.example.wodcrmapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -48,6 +49,7 @@ public class Client {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
+    @JsonIgnoreProperties({"password", "createdAt", "updatedAt", "roles"})
     private User createdBy;
 
     @CreatedDate
