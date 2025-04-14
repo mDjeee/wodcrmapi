@@ -1,5 +1,6 @@
 package com.example.wodcrmapi.controller;
 
+import com.example.wodcrmapi.dto.response.UserResponse;
 import com.example.wodcrmapi.entity.Company;
 import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.service.SuperUserService;
@@ -26,10 +27,9 @@ public class SuperUserController {
         this.superUserService = superUserService;
     }
 
-
     @GetMapping("/init")
-    @Operation(summary = "Create super user", description = "Creates super user")
-    public User getAllCompanies() throws BadRequestException {
+    @Operation(summary = "Init super user", description = "Init super user")
+    public UserResponse initSuperUser() throws BadRequestException {
         return superUserService.initSuperUser();
     }
 }

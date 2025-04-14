@@ -1,63 +1,64 @@
 package com.example.wodcrmapi.service;
 
 
+import com.example.wodcrmapi.dto.response.UserResponse;
+import com.example.wodcrmapi.entity.Permission;
 import com.example.wodcrmapi.entity.Role;
 import com.example.wodcrmapi.entity.User;
-import com.example.wodcrmapi.repository.RoleRepository;
+import com.example.wodcrmapi.mapper.UserMapper;
 import com.example.wodcrmapi.repository.UserRepository;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SuperUserService {
 
-    @Autowired
     private final UserRepository userRepository;
-
-    @Autowired
-    private final RoleRepository roleRepository;
-
-    @Autowired
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
+    private final UserMapper userMapper;
 
 
-    public SuperUserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public SuperUserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            RoleService roleService,
+            UserMapper userMapper
+            ) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
+        this.userMapper = userMapper;
     }
 
-    public User initSuperUser() throws BadRequestException {
+    public UserResponse initSuperUser() throws BadRequestException {
 
-        Boolean isExists = userRepository.existsByUsername("superAdmin");
-        if(isExists) {
-            throw new BadRequestException("Username already exists");
-        }
+        Role superAdminRole = roleService.ensureSuperAdminRoleExists();
 
-        User owner = new User();
-        owner.setUsername("superAdmin");
-        owner.setPassword(passwordEncoder.encode("super123"));
-        owner.setFirstName("Islam");
-        owner.setLastName("Seytniyazov");
-        owner.setPhone("998913721426");
+        User user = userRepository.findByUsername("superAdmin")
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setUsername("superAdmin");
+                    return newUser;
+                });
 
-        Set<Role> roles = Set.of(
-                getOrCreateRole(Role.RoleName.ROLE_APPLICATION_OWNER)
-        );
+        user.getRoles().clear();
+        user.getRoles().add(superAdminRole);
 
-        owner.setRoles(roles);
+        user.setPassword(passwordEncoder.encode("super123"));
+        user.setFirstName("Islam");
+        user.setLastName("Seytniyazov");
+        user.setPhone("998913721426");
 
-        return userRepository.save(owner);
-    }
+        User savedUser = userRepository.save(user);
 
-    private Role getOrCreateRole(Role.RoleName roleName) {
-        return roleRepository.findByName(roleName)
-                .orElseGet(() -> roleRepository.save(new Role(roleName)));
+        return userMapper.mapToUserResponse(savedUser);
     }
 }
