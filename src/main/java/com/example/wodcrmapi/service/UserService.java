@@ -2,18 +2,18 @@ package com.example.wodcrmapi.service;
 
 import com.example.wodcrmapi.dto.request.CreateUserRequest;
 import com.example.wodcrmapi.dto.response.UserResponse;
-import com.example.wodcrmapi.entity.Permission;
 import com.example.wodcrmapi.entity.Role;
 import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
 import com.example.wodcrmapi.mapper.UserMapper;
-import com.example.wodcrmapi.repository.CompanyUserRepository;
+import com.example.wodcrmapi.repository.RoleRepository;
 import com.example.wodcrmapi.repository.UserRepository;
 import org.apache.coyote.BadRequestException;
-import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,16 +22,18 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     public UserService(UserRepository userRepository,
-                       CompanyUserRepository companyUserRepository,
-                       ModelMapper modelMapper,
-                       UserMapper userMapper) {
+                       UserMapper userMapper,
+                       @Lazy PasswordEncoder passwordEncoder,
+                       RoleRepository roleRepository) {
         this.userRepository = userRepository;
-        this.modelMapper = modelMapper;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     public User createUser(CreateUserRequest request) throws BadRequestException {
@@ -39,7 +41,19 @@ public class UserService {
         if(isExists) {
             throw new BadRequestException("Username already exists");
         }
-        User user = userRepository.save(modelMapper.map(request, User.class));
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPhone(request.getPhone());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
+            user.setRoles(roles);
+        }
+
         return userRepository.save(user);
     }
 

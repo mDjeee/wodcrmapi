@@ -1,5 +1,6 @@
 package com.example.wodcrmapi.service;
 
+import com.example.wodcrmapi.dto.request.CreateRoleRequest;
 import com.example.wodcrmapi.entity.Permission;
 import com.example.wodcrmapi.entity.Role;
 import com.example.wodcrmapi.exception.NotFoundException;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class RoleService {
@@ -24,11 +26,20 @@ public class RoleService {
 
     /**
      * Create a new role
-     * @param role the role to create
+     * @param request the role to create
      * @return the created role
      */
     @Transactional
-    public Role createRole(Role role) {
+    public Role createRole(CreateRoleRequest request) {
+        Role role = new Role();
+        role.setName(request.getName());
+        role.setDisplayName(request.getDisplayName());
+
+        if (request.getPermissions() != null && !request.getPermissions().isEmpty()) {
+            Set<Permission> permissions = new HashSet<>(permissionRepository.findAllById(request.getPermissions()));
+            role.setPermissions(permissions);
+        }
+
         return roleRepository.save(role);
     }
 
@@ -103,7 +114,7 @@ public class RoleService {
      * @throws NotFoundException if role not found
      */
     @Transactional
-    public Role updateRole(Long id, Role roleDetails) throws NotFoundException {
+    public Role updateRole(Long id, CreateRoleRequest roleDetails) throws NotFoundException {
         Role role = getRoleById(id);
 
         if(role == null) {
@@ -113,8 +124,9 @@ public class RoleService {
         role.setName(roleDetails.getName());
         role.setDisplayName(roleDetails.getDisplayName());
 
-        if (roleDetails.getPermissions() != null) {
-            role.setPermissions(roleDetails.getPermissions());
+        if (roleDetails.getPermissions() != null && !roleDetails.getPermissions().isEmpty()) {
+            Set<Permission> permissions = new HashSet<>(permissionRepository.findAllById(roleDetails.getPermissions()));
+            role.setPermissions(permissions);
         }
 
         return roleRepository.save(role);

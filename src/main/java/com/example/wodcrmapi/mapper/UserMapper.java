@@ -15,6 +15,7 @@ public class UserMapper {
 
     public UserResponse mapToUserResponse(User user) {
         UserResponse response = new UserResponse();
+
         response.setId(user.getId());
         response.setUsername(user.getUsername());
         response.setFirstName(user.getFirstName());
@@ -27,12 +28,15 @@ public class UserMapper {
                 .collect(Collectors.toList()));
 
         // Map permissions
-        Set<Permission> permissions = user.getRoles().stream()
+        ArrayList<Permission> permissions = user.getRoles().stream()
                 .flatMap(role -> role.getPermissions().stream())
                 .map(this::mapPermissionToDto)
-                .collect(Collectors.toSet());
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(Permission::getId, p -> p, (p1, p2) -> p1),
+                        map -> new ArrayList<>(map.values())
+                ));
 
-        response.setPermissions(new ArrayList<>(permissions));
+        response.setPermissions(permissions);
         return response;
     }
 

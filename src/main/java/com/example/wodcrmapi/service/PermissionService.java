@@ -18,4 +18,8 @@ public class PermissionService {
     public List<Permission> getAllPermissions() {
         return permissionRepository.findAll();
     }
+
+    public Permission getPermissionById(Long id) {
+        return permissionRepository.findById(id).orElse(null);
+    }
 }
