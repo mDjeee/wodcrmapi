@@ -18,6 +18,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver: docker-container
+
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
@@ -32,9 +37,10 @@ jobs:
         with:
           context: .
           push: true
-          tags: mdjeee/wodcrmapi:latest
+          tags: mdjeee/wodcrmapi
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          platforms: linux/amd64
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
@@ -45,12 +51,10 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} << EOF
-          # Pull the latest changes
+          cd /home/ubuntu/app
           git clone https://github.com/mDjeee/wodcrmapi.git /home/ubuntu/app || cd /home/ubuntu/app && git pull
           
-          # Stop and remove existing containers
           docker-compose down || true
           
-          # Pull latest images and start
           docker-compose up -d --build
           EOF
