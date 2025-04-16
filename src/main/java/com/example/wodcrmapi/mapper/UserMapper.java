@@ -21,6 +21,8 @@ public class UserMapper {
         response.setFirstName(user.getFirstName());
         response.setLastName(user.getLastName());
         response.setPhone(user.getPhone());
+        response.setSuperAdmin(user.getSuperAdmin());
+        response.setCompanyId(user.getCompanyId());
 
         // Map role names
         response.setRoles(user.getRoles().stream()

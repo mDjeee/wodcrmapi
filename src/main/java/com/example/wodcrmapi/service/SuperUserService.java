@@ -42,10 +42,10 @@ public class SuperUserService {
 
         Role superAdminRole = roleService.ensureSuperAdminRoleExists();
 
-        User user = userRepository.findByUsername("superAdmin")
+        User user = userRepository.findByUsername("super")
                 .orElseGet(() -> {
                     User newUser = new User();
-                    newUser.setUsername("superAdmin");
+                    newUser.setUsername("super");
                     return newUser;
                 });
 
@@ -56,6 +56,7 @@ public class SuperUserService {
         user.setFirstName("Islam");
         user.setLastName("Seytniyazov");
         user.setPhone("998913721426");
+        user.setSuperAdmin(true);
 
         User savedUser = userRepository.save(user);
 

@@ -14,4 +14,6 @@ public class UserResponse {
     private String phone;
     private List<String> roles;
     private List<Permission> permissions;
+    private Boolean superAdmin;
+    private Long companyId;
 }

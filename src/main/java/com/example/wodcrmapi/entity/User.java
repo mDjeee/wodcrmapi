@@ -39,7 +39,13 @@ public class User {
     @Column(nullable = false)
     private String phone;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @Column
+    private Boolean superAdmin = false;
+
+    @Column
+    private Long companyId;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

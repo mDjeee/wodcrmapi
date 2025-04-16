@@ -49,7 +49,7 @@ public class Company {
     private boolean active = false;
 
     @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
+    @JoinColumn(name = "created_by")
     @JsonIgnoreProperties({"password", "createdAt", "updatedAt", "roles"})
     private User createdBy;
 

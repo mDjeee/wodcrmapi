@@ -1,20 +1,18 @@
 package com.example.wodcrmapi.service;
 
 import com.example.wodcrmapi.dto.request.LoginRequest;
-import com.example.wodcrmapi.dto.response.CustomUserDetails;
 import com.example.wodcrmapi.dto.response.JwtAuthenticationResponse;
+import com.example.wodcrmapi.dto.response.UserResponse;
 import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
 import com.example.wodcrmapi.exception.PasswordMismatchException;
+import com.example.wodcrmapi.mapper.UserMapper;
 import com.example.wodcrmapi.security.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +25,7 @@ public class AuthService {
     private final JWTUtil jwtUtil;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     public ResponseEntity<?> login(LoginRequest request) {
         try {
@@ -40,18 +39,10 @@ public class AuthService {
                 throw new PasswordMismatchException("Неверный пароль!");
             }
 
-            CustomUserDetails userDetails = new CustomUserDetails(
-                    user.getUsername(),
-                    user.getFirstName(),
-                    user.getLastName(),
-                    user.getPhone(),
-                    user.getRoles(),
-                    user.getCreatedAt(),
-                    user.getUpdatedAt()
-            );
+            UserResponse userResponse = userMapper.mapToUserResponse(user);
             String token = jwtUtil.generateToken(request.getUsername());
 
-            return ResponseEntity.ok(new JwtAuthenticationResponse(token, userDetails));
+            return ResponseEntity.ok(new JwtAuthenticationResponse(token, userResponse));
         }
         catch (PasswordMismatchException e) {
             throw e;
