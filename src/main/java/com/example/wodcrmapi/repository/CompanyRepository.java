@@ -1,6 +1,8 @@
 package com.example.wodcrmapi.repository;
 
 import com.example.wodcrmapi.entity.Company;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -13,4 +15,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Company> findBySubscriptionEndDateBeforeAndActiveTrue(LocalDate date);
 
     boolean existsByName(String name);
+
+    Page<Company> findAll(Pageable pageable);
 }

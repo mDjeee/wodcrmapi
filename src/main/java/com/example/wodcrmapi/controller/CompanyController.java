@@ -1,12 +1,17 @@
 package com.example.wodcrmapi.controller;
 
 import com.example.wodcrmapi.aop.CheckPermission;
+import com.example.wodcrmapi.aop.PaginationParams;
 import com.example.wodcrmapi.dto.request.CreateCompanyRequest;
+import com.example.wodcrmapi.dto.request.PaginationRequest;
+import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.entity.Company;
 import com.example.wodcrmapi.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,14 +31,16 @@ public class CompanyController {
     @GetMapping
     @CheckPermission(value = "COMPANY:READALL", description = "Get all companies", displayName = "Получение списка компаний")
     @Operation(summary = "Get all companies", description = "Returns a list of all companies")
-    public List<Company> getAllCompanies() {
-        return companyService.getAllCompanies();
+    public ResponseEntity<PaginatedResponse<Company>> getAllCompanies(
+            @PaginationParams PaginationRequest paginationReques
+    ) {
+        return companyService.getAllCompanies(paginationReques);
     }
 
     @PostMapping
     @CheckPermission(value = "COMPANY:CREATE", description = "Create company", displayName = "Добавление компаний")
     @Operation(summary = "Create a new company", description = "Adds a new company")
-    public Company createCompany(@RequestBody CreateCompanyRequest request) throws BadRequestException {
+    public Company createCompany(@Valid @RequestBody CreateCompanyRequest request) throws BadRequestException {
         return companyService.createCompany(request);
     }
 

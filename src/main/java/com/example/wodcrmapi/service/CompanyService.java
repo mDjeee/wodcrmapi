@@ -1,6 +1,8 @@
 package com.example.wodcrmapi.service;
 
 import com.example.wodcrmapi.dto.request.CreateCompanyRequest;
+import com.example.wodcrmapi.dto.request.PaginationRequest;
+import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.entity.Company;
 import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
@@ -8,6 +10,10 @@ import com.example.wodcrmapi.repository.CompanyRepository;
 import com.example.wodcrmapi.security.SecurityUtils;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +50,9 @@ public class CompanyService {
         return companyRepository.findById(id).orElse(null);
     }
 
-    public List<Company> getAllCompanies() {
-        return companyRepository.findAll();
+    public ResponseEntity<PaginatedResponse<Company>> getAllCompanies(PaginationRequest paginationRequest) {
+        Page<Company> pageResult = companyRepository.findAll(paginationRequest.toPageable());
+        return ResponseEntity.ok(new PaginatedResponse<>(pageResult));
     }
 
     public Company updateCompany(Long id, Company company) {
