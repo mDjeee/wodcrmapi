@@ -1,5 +1,7 @@
 package com.example.wodcrmapi.config;
 
+import jakarta.annotation.PostConstruct;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 
 import com.example.wodcrmapi.aop.CheckPermission;
@@ -8,6 +10,7 @@ import com.example.wodcrmapi.repository.PermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,22 +24,32 @@ public class PermissionLoaderConfig implements ApplicationListener<ApplicationRe
     private final ApplicationContext applicationContext;
     private final PermissionRepository permissionRepository;
 
+    @PostConstruct
+    public void init() {
+        System.out.println("PermissionLoaderConfig initialized!");
+    }
+
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         Map<String, Object> controllers = applicationContext.getBeansWithAnnotation(RestController.class);
+        System.out.println("onApplicationEvent initialized!");
+
+
+        System.out.println(controllers.values());
 
         for (Object controller : controllers.values()) {
-            Class<?> controllerClass = controller.getClass();
+            Class<?> controllerClass = AopUtils.getTargetClass(controller);
 
-            // Check if class itself has annotation
-            if (controllerClass.isAnnotationPresent(CheckPermission.class)) {
-                processPermission(controllerClass.getAnnotation(CheckPermission.class));
+            CheckPermission classAnnotation = AnnotationUtils.findAnnotation(controllerClass, CheckPermission.class);
+
+            if (classAnnotation != null) {
+                processPermission(classAnnotation);
             }
 
-            // Check methods
             for (Method method : controllerClass.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(CheckPermission.class)) {
-                    processPermission(method.getAnnotation(CheckPermission.class));
+                CheckPermission methodAnnotation = AnnotationUtils.findAnnotation(method, CheckPermission.class);
+                if (methodAnnotation != null) {
+                    processPermission(methodAnnotation);
                 }
             }
         }
@@ -46,6 +59,7 @@ public class PermissionLoaderConfig implements ApplicationListener<ApplicationRe
         String name = annotation.value().toLowerCase(); // e.g., "user:create"
         String description = annotation.description();
         String displayName = annotation.displayName();
+        System.out.println("kjhkhkhj");
 
         Permission permission = permissionRepository.findByName(name).orElseGet(Permission::new);
 
@@ -64,6 +78,10 @@ public class PermissionLoaderConfig implements ApplicationListener<ApplicationRe
             }
         }
 
-        permissionRepository.save(permission);
-    }
+        try {
+            permissionRepository.save(permission);
+            System.out.println("Saved permission: " + name);
+        } catch (Exception e) {
+            System.err.println("Failed to save permission " + name + ": " + e.getMessage());
+        }    }
 }
