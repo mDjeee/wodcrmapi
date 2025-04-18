@@ -8,11 +8,13 @@ import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
 import com.example.wodcrmapi.repository.CompanyRepository;
 import com.example.wodcrmapi.security.SecurityUtils;
+import com.example.wodcrmapi.specifications.CompanySpecifications;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +27,17 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final ModelMapper modelMapper;
     private final SecurityUtils securityUtils;
+    private final MessageService messageService;
 
-    public CompanyService(CompanyRepository companyRepository, ModelMapper modelMapper, SecurityUtils securityUtils) {
+    public CompanyService(
+            CompanyRepository companyRepository,
+            ModelMapper modelMapper, SecurityUtils securityUtils,
+            MessageService messageService
+            ) {
         this.companyRepository = companyRepository;
         this.modelMapper = modelMapper;
         this.securityUtils = securityUtils;
+        this.messageService = messageService;
     }
 
     public Company createCompany(CreateCompanyRequest request) throws BadRequestException {
@@ -51,7 +59,8 @@ public class CompanyService {
     }
 
     public ResponseEntity<PaginatedResponse<Company>> getAllCompanies(PaginationRequest paginationRequest) {
-        Page<Company> pageResult = companyRepository.findAll(paginationRequest.toPageable());
+        Specification<Company> spec = CompanySpecifications.withSearch(paginationRequest.getSearch());
+        Page<Company> pageResult = companyRepository.findAll(spec, paginationRequest.toPageable());
         return ResponseEntity.ok(new PaginatedResponse<>(pageResult));
     }
 
@@ -64,7 +73,7 @@ public class CompanyService {
                     // Add other fields as needed
                     return companyRepository.save(existingCompany);
                 })
-                .orElseThrow(() -> new RuntimeException("Company not found"));
+                .orElseThrow(() -> new NotFoundException("Company not found"));
     }
 
     @Transactional

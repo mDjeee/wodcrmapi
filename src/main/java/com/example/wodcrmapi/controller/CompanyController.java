@@ -32,9 +32,9 @@ public class CompanyController {
     @CheckPermission(value = "COMPANY:READALL", description = "Get all companies", displayName = "Получение списка компаний")
     @Operation(summary = "Get all companies", description = "Returns a list of all companies")
     public ResponseEntity<PaginatedResponse<Company>> getAllCompanies(
-            @PaginationParams PaginationRequest paginationReques
+            @PaginationParams PaginationRequest paginationRequest
     ) {
-        return companyService.getAllCompanies(paginationReques);
+        return companyService.getAllCompanies(paginationRequest);
     }
 
     @PostMapping
@@ -59,7 +59,7 @@ public class CompanyController {
     }
 
     @DeleteMapping("/{id}")
-    @CheckPermission(value = "COMPANY:DELETE", description = "DElete company", displayName = "Удаление компаний")
+    @CheckPermission(value = "COMPANY:DELETE", description = "Delete company", displayName = "Удаление компаний")
     @Operation(summary = "Delete company by id", description = "Deletes company by ID")
     public void deleteCompany(@PathVariable Long id) {
         companyService.deleteCompany(id);

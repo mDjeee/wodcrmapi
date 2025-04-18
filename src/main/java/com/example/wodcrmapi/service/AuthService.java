@@ -29,10 +29,10 @@ public class AuthService {
 
     public ResponseEntity<?> login(LoginRequest request) {
         try {
-            
+
             User user = userService.findByUsername(request.getUsername());
             if (user == null) {
-                throw new NotFoundException("Пользователь не найден.");
+                throw new NotFoundException("Not Found");
             }
 
             if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -44,8 +44,11 @@ public class AuthService {
 
             return ResponseEntity.ok(new JwtAuthenticationResponse(token, userResponse));
         }
+        catch (NotFoundException e) {
+            throw new NotFoundException("user.not_found");
+        }
         catch (PasswordMismatchException e) {
-            throw e;
+            throw new PasswordMismatchException("Неверный пароль!");
         }
         catch (BadCredentialsException e) {
             throw new BadCredentialsException("Неверные учетные данные.");

@@ -18,6 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.util.List;
 
@@ -48,6 +52,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        List<RequestMatcher> publicEndpoints = List.of(
+                new AntPathRequestMatcher("/swagger-ui.html"),
+                new AntPathRequestMatcher("/swagger-ui/**"),
+                new AntPathRequestMatcher("/v3/api-docs/**"),
+                new AntPathRequestMatcher("/swagger-resources/**"),
+                new AntPathRequestMatcher("/webjars/**"),
+                new AntPathRequestMatcher("/auth/**"),
+                new AntPathRequestMatcher("/api/super-user/init")
+        );
+
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfiguration = new org.springframework.web.cors.CorsConfiguration();
@@ -59,22 +73,14 @@ public class SecurityConfig {
                 }))
                 .csrf(AbstractHttpConfigurer::disable) // keep CSRF disabled for APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**",
-                                "/auth/**",
-                                "/api/super-user/init"
-                        ).permitAll()
-                        .requestMatchers("/admin/**").hasRole("APPLICATION_OWNER")
-                        .requestMatchers("/company/**").hasRole("COMPANY_ADMIN")
-                        .requestMatchers("/client/**").hasAnyRole("COMPANY_ADMIN", "COMPANY_USER")
+                        .requestMatchers(publicEndpoints.toArray(new RequestMatcher[0])).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .defaultAuthenticationEntryPointFor(
+                                authenticationEntryPoint,
+                                new NegatedRequestMatcher(new OrRequestMatcher(publicEndpoints))
+                        )
                 )
                 .addFilterBefore(secFilter, UsernamePasswordAuthenticationFilter.class);
 

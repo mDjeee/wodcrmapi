@@ -2,6 +2,7 @@ package com.example.wodcrmapi.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.domain.PageRequest;
@@ -21,9 +22,16 @@ public class PaginationRequest {
     private String sortBy = "id";
     private String sortDirection = "asc";
 
+    @Size(max = 100, message = "Search term must not exceed 100 characters")
+    private String search;
+
     public Pageable toPageable() {
         Sort.Direction direction = Sort.Direction.fromString(sortDirection);
         Sort sort = Sort.by(direction, sortBy);
         return PageRequest.of(page, size, sort);
+    }
+
+    public boolean hasSearchTerm() {
+        return search != null && !search.trim().isEmpty();
     }
 }

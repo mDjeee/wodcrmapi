@@ -25,18 +25,21 @@ public class PaginationParamsArgumentResolver implements HandlerMethodArgumentRe
 
         PaginationParams annotation = parameter.getParameterAnnotation(PaginationParams.class);
 
-        int page = Integer.parseInt(webRequest.getParameter("page") != null ?
-                webRequest.getParameter("page") : annotation.pageDefault());
 
-        int size = Integer.parseInt(webRequest.getParameter("size") != null ?
-                webRequest.getParameter("size") : annotation.sizeDefault());
+        int page = parseWithDefault(webRequest.getParameter("page"), annotation.pageDefault());
+        int size = parseWithDefault(webRequest.getParameter("size"), annotation.sizeDefault());
+        String sortBy = getWithDefault(webRequest.getParameter("sortBy"), annotation.sortByDefault());
+        String sortDirection = getWithDefault(webRequest.getParameter("sortDirection"), annotation.sortDirectionDefault());
+        String search = webRequest.getParameter("search");
 
-        String sortBy = webRequest.getParameter("sortBy") != null ?
-                webRequest.getParameter("sortBy") : annotation.sortByDefault();
+        return new PaginationRequest(page, size, sortBy, sortDirection, search);
+    }
 
-        String sortDirection = webRequest.getParameter("sortDirection") != null ?
-                webRequest.getParameter("sortDirection") : annotation.sortDirectionDefault();
+    private int parseWithDefault(String value, int defaultValue) {
+        return value != null ? Integer.parseInt(value) : defaultValue;
+    }
 
-        return new PaginationRequest(page, size, sortBy, sortDirection);
+    private String getWithDefault(String value, String defaultValue) {
+        return value != null ? value : defaultValue;
     }
 }
