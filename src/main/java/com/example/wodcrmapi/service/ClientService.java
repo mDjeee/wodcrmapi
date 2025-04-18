@@ -1,6 +1,7 @@
 package com.example.wodcrmapi.service;
 
 import com.example.wodcrmapi.dto.request.CreateClientRequest;
+import com.example.wodcrmapi.dto.response.CompanyResponse;
 import com.example.wodcrmapi.entity.Client;
 import com.example.wodcrmapi.entity.Company;
 import com.example.wodcrmapi.entity.User;
@@ -53,14 +54,14 @@ public class ClientService {
         client.setFirstName(request.getFirstName());
         client.setLastName(request.getLastName());
 
-        Company company = companyService.getCompanyById(request.getCompanyId());
+        CompanyResponse company = companyService.getCompanyById(request.getCompanyId());
 
         if(company == null) {
             throw new BadRequestException(
                     String.format("Компании с ID %s не существует", request.getCompanyId())
             );
         } else {
-            client.setCompany(company);
+            client.setCompanyId(company.getId());
         }
 
         User currentUser = securityUtils.getCurrentUser();

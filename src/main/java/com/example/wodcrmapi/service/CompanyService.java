@@ -2,10 +2,12 @@ package com.example.wodcrmapi.service;
 
 import com.example.wodcrmapi.dto.request.CreateCompanyRequest;
 import com.example.wodcrmapi.dto.request.PaginationRequest;
+import com.example.wodcrmapi.dto.response.CompanyResponse;
 import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.entity.Company;
 import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
+import com.example.wodcrmapi.mapper.CompanyMapper;
 import com.example.wodcrmapi.repository.CompanyRepository;
 import com.example.wodcrmapi.security.SecurityUtils;
 import com.example.wodcrmapi.specifications.CompanySpecifications;
@@ -27,20 +29,23 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final ModelMapper modelMapper;
     private final SecurityUtils securityUtils;
-    private final MessageService messageService;
+
+    private final CompanyMapper companyMapper;
+
 
     public CompanyService(
             CompanyRepository companyRepository,
-            ModelMapper modelMapper, SecurityUtils securityUtils,
-            MessageService messageService
-            ) {
+            ModelMapper modelMapper,
+            SecurityUtils securityUtils,
+            CompanyMapper companyMapper
+    ) {
         this.companyRepository = companyRepository;
         this.modelMapper = modelMapper;
         this.securityUtils = securityUtils;
-        this.messageService = messageService;
+        this.companyMapper = companyMapper;
     }
 
-    public Company createCompany(CreateCompanyRequest request) throws BadRequestException {
+    public CompanyResponse createCompany(CreateCompanyRequest request) throws BadRequestException {
         boolean isExists = companyRepository.existsByName(request.getName());
         if (isExists) {
             throw new BadRequestException("Company name already exists");
@@ -51,27 +56,36 @@ public class CompanyService {
         Company company = modelMapper.map(request, Company.class);
         company.setCreatedBy(currentUser);
 
-        return companyRepository.save(company);
+        Company savedCompany = companyRepository.save(company);
+
+        return modelMapper.map(savedCompany, CompanyResponse.class);
     }
 
-    public Company getCompanyById(Long id) {
-        return companyRepository.findById(id).orElse(null);
+    public CompanyResponse getCompanyById(Long id) {
+        Company company = companyRepository.findById(id).orElseThrow(() -> new NotFoundException("Company not found"));
+        return modelMapper.map(company, CompanyResponse.class);
     }
 
-    public ResponseEntity<PaginatedResponse<Company>> getAllCompanies(PaginationRequest paginationRequest) {
+    public ResponseEntity<PaginatedResponse<CompanyResponse>> getAllCompanies(PaginationRequest paginationRequest) {
         Specification<Company> spec = CompanySpecifications.withSearch(paginationRequest.getSearch());
         Page<Company> pageResult = companyRepository.findAll(spec, paginationRequest.toPageable());
-        return ResponseEntity.ok(new PaginatedResponse<>(pageResult));
+        Page<CompanyResponse> responsePage = pageResult.map(companyMapper::toResponse);
+
+        return ResponseEntity.ok(new PaginatedResponse<>(responsePage));
     }
 
-    public Company updateCompany(Long id, Company company) {
+    public CompanyResponse updateCompany(Long id, CreateCompanyRequest company) {
         return companyRepository.findById(id)
                 .map(existingCompany -> {
                     existingCompany.setName(company.getName());
                     existingCompany.setAddress(company.getAddress());
                     existingCompany.setPhone(company.getPhone());
+                    existingCompany.setDomain(company.getDomain());
                     // Add other fields as needed
-                    return companyRepository.save(existingCompany);
+                    Company updatedCompany = companyRepository.save(existingCompany);
+                    CompanyResponse companyResponse = modelMapper.map(updatedCompany, CompanyResponse.class);
+
+                    return companyResponse;
                 })
                 .orElseThrow(() -> new NotFoundException("Company not found"));
     }

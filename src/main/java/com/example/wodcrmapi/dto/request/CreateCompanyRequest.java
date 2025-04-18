@@ -16,8 +16,6 @@ public class CreateCompanyRequest {
     private String name;
 
     @NotBlank(message = "Domain is required")
-    @Pattern(regexp = "^([a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}$",
-            message = "Invalid domain format")
     private String domain;
 
     @NotBlank(message = "Address is required")
@@ -25,12 +23,11 @@ public class CreateCompanyRequest {
     private String address;
 
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^\\+?[0-9\\-\\s()]{7,20}$",
+    @Pattern(regexp = "^998[0-9]{9}$",
             message = "Invalid phone number format")
     private String phone;
 
     @NotNull(message = "Subscription start date is required")
-    @FutureOrPresent(message = "Subscription start date must be today or in the future")
     private LocalDate subscriptionStartDate;
 
     @NotNull(message = "Subscription end date is required")

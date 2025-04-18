@@ -23,9 +23,8 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+    @Column(nullable = false)
+    private Long companyId;
 
     @Column(nullable = false)
     private String firstName;

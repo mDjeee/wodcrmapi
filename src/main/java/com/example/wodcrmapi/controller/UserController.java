@@ -32,7 +32,7 @@ public class UserController {
     @PostMapping
     @CheckPermission(value = "USER:CREATE", description = "Create user", displayName = "Создание полльзователя")
     @Operation(summary = "Create a new user", description = "Adds a new user")
-    public User createUser(@RequestBody CreateUserRequest user) throws BadRequestException {
+    public UserResponse createUser(@RequestBody CreateUserRequest user) throws BadRequestException {
         return userService.createUser(user);
     }
 
@@ -46,7 +46,7 @@ public class UserController {
     @PutMapping("/{id}")
     @CheckPermission(value = "USER:UPDATE", description = "Update user", displayName = "Обновление полльзователя")
     @Operation(summary = "Update user by id", description = "Updates and return user")
-    public UserResponse updateUser(@PathVariable Long id, @RequestBody User user) {
+    public UserResponse updateUser(@PathVariable Long id, @RequestBody CreateUserRequest user) {
         return userService.updateUser(id, user);
     }
 

@@ -8,6 +8,7 @@ import com.example.wodcrmapi.exception.NotFoundException;
 import com.example.wodcrmapi.mapper.UserMapper;
 import com.example.wodcrmapi.repository.RoleRepository;
 import com.example.wodcrmapi.repository.UserRepository;
+import com.example.wodcrmapi.security.SecurityUtils;
 import org.apache.coyote.BadRequestException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,18 +26,22 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private SecurityUtils securityUtils;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper,
                        @Lazy PasswordEncoder passwordEncoder,
-                       RoleRepository roleRepository) {
+                       RoleRepository roleRepository,
+                       SecurityUtils securityUtils
+                       ) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
+        this.securityUtils = securityUtils;
     }
 
-    public User createUser(CreateUserRequest request) throws BadRequestException {
+    public UserResponse createUser(CreateUserRequest request) throws BadRequestException {
         Boolean isExists = userRepository.existsByUsername(request.getUsername());
         if(isExists) {
             throw new BadRequestException("Username already exists");
@@ -49,12 +54,24 @@ public class UserService {
         user.setPhone(request.getPhone());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
+
+        User currentUser = securityUtils.getCurrentUser();
+        Long companyId = currentUser.getCompanyId();
+
+        if(companyId != null) {
+            user.setCompanyId(companyId);
+        } else {
+            user.setCompanyId(request.getCompanyId());
+        }
+
         if (request.getRoles() != null && !request.getRoles().isEmpty()) {
             Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
             user.setRoles(roles);
         }
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        return userMapper.mapToUserResponse(savedUser);
     }
 
     public UserResponse getUserById(Long id) {
@@ -74,16 +91,25 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public UserResponse updateUser(Long id, User user) {
+    public UserResponse updateUser(Long id, CreateUserRequest request) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
+        existingUser.setUsername(request.getUsername());
+        existingUser.setPassword(request.getPassword());
+        existingUser.setFirstName(request.getFirstName());
+        existingUser.setLastName(request.getLastName());
+        existingUser.setPhone(request.getPhone());
 
-        existingUser.setUsername(user.getUsername());
-        existingUser.setPassword(user.getPassword());
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
-        existingUser.setPhone(user.getPhone());
+        User currentUser = securityUtils.getCurrentUser();
+        Long companyId = currentUser.getCompanyId();
+
+        if(companyId != null) {
+            existingUser.setCompanyId(companyId);
+        } else {
+            existingUser.setCompanyId(request.getCompanyId());
+        }
+
         User updatedUser = userRepository.save(existingUser);
 
         return userMapper.mapToUserResponse(updatedUser);

@@ -67,37 +67,43 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
+        String errorMessage = getLocalizedErrorMessage(ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value()));
+                .body(new ErrorResponse(errorMessage, HttpStatus.BAD_REQUEST.value()));
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
+        String errorMessage = getLocalizedErrorMessage(ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value()));
+                .body(new ErrorResponse(errorMessage, HttpStatus.BAD_REQUEST.value()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleForbiddenRequest(AccessDeniedException ex) {
+        String errorMessage = getLocalizedErrorMessage(ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN.value()));
+                .body(new ErrorResponse(errorMessage, HttpStatus.FORBIDDEN.value()));
     }
 
     @ExceptionHandler(PasswordMismatchException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(PasswordMismatchException ex) {
+        String errorMessage = getLocalizedErrorMessage(ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value()));
+                .body(new ErrorResponse(errorMessage, HttpStatus.BAD_REQUEST.value()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleOtherExceptions(Exception ex) {
+
+        String errorMessage = getLocalizedErrorMessage(ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()));
+                .body(new ErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

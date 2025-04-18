@@ -45,7 +45,7 @@ public class AuthService {
             return ResponseEntity.ok(new JwtAuthenticationResponse(token, userResponse));
         }
         catch (NotFoundException e) {
-            throw new NotFoundException("user.not_found");
+            throw new NotFoundException("User not found");
         }
         catch (PasswordMismatchException e) {
             throw new PasswordMismatchException("Неверный пароль!");

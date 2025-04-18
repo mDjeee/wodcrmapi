@@ -4,6 +4,7 @@ import com.example.wodcrmapi.aop.CheckPermission;
 import com.example.wodcrmapi.aop.PaginationParams;
 import com.example.wodcrmapi.dto.request.CreateCompanyRequest;
 import com.example.wodcrmapi.dto.request.PaginationRequest;
+import com.example.wodcrmapi.dto.response.CompanyResponse;
 import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.entity.Company;
 import com.example.wodcrmapi.service.CompanyService;
@@ -31,7 +32,7 @@ public class CompanyController {
     @GetMapping
     @CheckPermission(value = "COMPANY:READALL", description = "Get all companies", displayName = "Получение списка компаний")
     @Operation(summary = "Get all companies", description = "Returns a list of all companies")
-    public ResponseEntity<PaginatedResponse<Company>> getAllCompanies(
+    public ResponseEntity<PaginatedResponse<CompanyResponse>> getAllCompanies(
             @PaginationParams PaginationRequest paginationRequest
     ) {
         return companyService.getAllCompanies(paginationRequest);
@@ -40,21 +41,21 @@ public class CompanyController {
     @PostMapping
     @CheckPermission(value = "COMPANY:CREATE", description = "Create company", displayName = "Добавление компаний")
     @Operation(summary = "Create a new company", description = "Adds a new company")
-    public Company createCompany(@Valid @RequestBody CreateCompanyRequest request) throws BadRequestException {
+    public CompanyResponse createCompany(@Valid @RequestBody CreateCompanyRequest request) throws BadRequestException {
         return companyService.createCompany(request);
     }
 
     @GetMapping("/{id}")
     @CheckPermission(value = "COMPANY:READ", description = "Get company", displayName = "Получение компаний")
     @Operation(summary = "Get company by id", description = "Returns company by ID")
-    public Company getCompanyById(@PathVariable Long id) {
+    public CompanyResponse getCompanyById(@PathVariable Long id) {
         return companyService.getCompanyById(id);
     }
 
     @PutMapping("/{id}")
     @CheckPermission(value = "COMPANY:UPDATE", description = "Update company", displayName = "Обновление компаний")
     @Operation(summary = "Update company by id", description = "Updates and returns company")
-    public Company updateCompany(@PathVariable Long id, @RequestBody Company company) {
+    public CompanyResponse updateCompany(@PathVariable Long id, @RequestBody CreateCompanyRequest company) {
         return companyService.updateCompany(id, company);
     }
 
