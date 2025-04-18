@@ -1,9 +1,9 @@
 package com.example.wodcrmapi.specifications;
 
 import com.example.wodcrmapi.entity.User;
-import jakarta.persistence.criteria.Path;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.Set;
 
 public class UserSpecifications {
 
@@ -23,30 +23,30 @@ public class UserSpecifications {
         };
     }
 
-    public static Specification<User> withSorting(String sortBy, String sortDirection) {
+    public static Specification<User> withRoles(Set<Long> roleIds) {
         return (root, query, cb) -> {
-            if (sortBy != null && !sortBy.trim().isEmpty()) {
-                Sort.Direction direction = Sort.Direction.fromString(sortDirection);
-                Path<Object> fieldPath = root.get(sortBy);
-
-                query.orderBy(
-                        direction.isAscending() ?
-                                cb.asc(fieldPath) :
-                                cb.desc(fieldPath)
-                );
+            if (roleIds == null || roleIds.isEmpty()) {
+                return cb.conjunction();
             }
-            return cb.conjunction(); // No filtering, only sorting
+            return root.join("roles").get("id").in(roleIds);
         };
     }
 
-    /**
-     * Combines search and sorting into a single Specification.
-     */
-    public static Specification<User> withSearchAndSorting(
-            String searchTerm,
-            String sortBy,
-            String sortDirection
-    ) {
-        return withSearch(searchTerm).and(withSorting(sortBy, sortDirection));
+    public static Specification<User> withCompany(Long companyId) {
+        return (root, query, cb) -> {
+            if (companyId == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("companyId"), companyId);
+        };
+    }
+
+    public static Specification<User> isSuperAdmin(Boolean isSuperAdmin) {
+        return (root, query, cb) -> {
+            if (isSuperAdmin == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("superAdmin"), isSuperAdmin);
+        };
     }
 }

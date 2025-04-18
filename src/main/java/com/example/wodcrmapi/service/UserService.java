@@ -2,6 +2,7 @@ package com.example.wodcrmapi.service;
 
 import com.example.wodcrmapi.dto.request.CreateUserRequest;
 import com.example.wodcrmapi.dto.request.PaginationRequest;
+import com.example.wodcrmapi.dto.request.UserFilterRequest;
 import com.example.wodcrmapi.dto.response.CompanyResponse;
 import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.dto.response.UserResponse;
@@ -93,8 +94,15 @@ public class UserService {
         return userRepository.findByUsername(username).orElse(null);
     }
 
-    public ResponseEntity<PaginatedResponse<UserResponse>> getAllUsers(PaginationRequest paginationRequest) {
-        Specification<User> spec = UserSpecifications.withSearch(paginationRequest.getSearch());
+    public ResponseEntity<PaginatedResponse<UserResponse>> getAllUsers(
+            PaginationRequest paginationRequest,
+            UserFilterRequest userFilterRequest
+            ) {
+        Specification<User> spec = UserSpecifications.withSearch(paginationRequest.getSearch())
+                .and(UserSpecifications.withRoles(userFilterRequest.getRoleIds()))
+                .and(UserSpecifications.withCompany(userFilterRequest.getCompanyId()))
+                .and(UserSpecifications.isSuperAdmin(userFilterRequest.getIsSuperAdmin()));
+
         Page<User> pageResult = userRepository.findAll(spec, paginationRequest.toPageable());
         Page<UserResponse> responsePage = pageResult
                 .map(userMapper::mapToUserResponse);

@@ -3,6 +3,7 @@ package com.example.wodcrmapi.controller;
 import com.example.wodcrmapi.aop.CheckPermission;
 import com.example.wodcrmapi.dto.request.CreateUserRequest;
 import com.example.wodcrmapi.dto.request.PaginationRequest;
+import com.example.wodcrmapi.dto.request.UserFilterRequest;
 import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.dto.response.UserResponse;
 import com.example.wodcrmapi.service.UserService;
@@ -27,9 +28,10 @@ public class UserController {
     @CheckPermission(value = "USER:READALL", description = "GET all users", displayName = "Получение списка полльзователей")
     @Operation(summary = "Get all users", description = "Returns a list of all users")
     public ResponseEntity<PaginatedResponse<UserResponse>> getAllUsers(
-            @ModelAttribute PaginationRequest paginationRequest
+            @ModelAttribute PaginationRequest paginationRequest,
+            @ModelAttribute UserFilterRequest userFilterRequest
     ) {
-        return userService.getAllUsers(paginationRequest);
+        return userService.getAllUsers(paginationRequest, userFilterRequest);
     }
 
     @PostMapping

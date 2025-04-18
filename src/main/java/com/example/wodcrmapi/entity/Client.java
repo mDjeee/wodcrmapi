@@ -37,6 +37,10 @@ public class Client {
 
     private String phone;
 
+    @ManyToOne
+    @JoinColumn(name = "deal_id", nullable = false)
+    private Deal deal;
+
     @Column(name = "subscription_start_date")
     private LocalDate subscriptionStartDate;
 
@@ -58,4 +62,11 @@ public class Client {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // Helper method to calculate end date based on deal duration
+    public void calculateEndDate() {
+        if (this.subscriptionStartDate != null && this.deal != null) {
+            this.subscriptionEndDate = this.subscriptionStartDate.plusMonths(this.deal.getDurationMonths());
+        }
+    }
 }
