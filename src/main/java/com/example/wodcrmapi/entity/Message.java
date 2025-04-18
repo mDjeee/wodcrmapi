@@ -29,16 +29,16 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String key;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String ru;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String uz;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String kaa;
 
     public Message(String key) {

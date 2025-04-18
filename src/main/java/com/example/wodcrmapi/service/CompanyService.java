@@ -1,5 +1,6 @@
 package com.example.wodcrmapi.service;
 
+import com.example.wodcrmapi.dto.request.CompanyFilterRequest;
 import com.example.wodcrmapi.dto.request.CreateCompanyRequest;
 import com.example.wodcrmapi.dto.request.PaginationRequest;
 import com.example.wodcrmapi.dto.response.CompanyResponse;
@@ -66,8 +67,12 @@ public class CompanyService {
         return modelMapper.map(company, CompanyResponse.class);
     }
 
-    public ResponseEntity<PaginatedResponse<CompanyResponse>> getAllCompanies(PaginationRequest paginationRequest) {
-        Specification<Company> spec = CompanySpecifications.withSearch(paginationRequest.getSearch());
+    public ResponseEntity<PaginatedResponse<CompanyResponse>> getAllCompanies(
+            PaginationRequest paginationRequest,
+            CompanyFilterRequest companyFilterRequest
+    ) {
+        Specification<Company> spec = CompanySpecifications.withSearch(paginationRequest.getSearch())
+                .and(CompanySpecifications.withStatus(companyFilterRequest.getActive()));
         Page<Company> pageResult = companyRepository.findAll(spec, paginationRequest.toPageable());
         Page<CompanyResponse> responsePage = pageResult.map(companyMapper::toResponse);
 

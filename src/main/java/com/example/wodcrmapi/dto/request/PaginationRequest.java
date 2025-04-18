@@ -51,4 +51,6 @@ public class PaginationRequest {
     public boolean hasSearchTerm() {
         return search != null && !search.trim().isEmpty();
     }
+
+    public PaginationRequest() {}
 }

@@ -17,5 +17,4 @@ public class CompanyResponse {
     private UserResponse createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
 }

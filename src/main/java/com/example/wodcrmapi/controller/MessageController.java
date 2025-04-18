@@ -2,7 +2,6 @@ package com.example.wodcrmapi.controller;
 
 
 import com.example.wodcrmapi.aop.CheckPermission;
-import com.example.wodcrmapi.aop.PaginationParams;
 import com.example.wodcrmapi.dto.request.MessageRequest;
 import com.example.wodcrmapi.dto.request.PaginationRequest;
 import com.example.wodcrmapi.dto.response.PaginatedResponse;
@@ -14,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +35,7 @@ public class MessageController {
     @CheckPermission(value = "MESSAGE:READALL", description = "Get all messages", displayName = "Получение списка сообщений")
     @Operation(summary = "Get all messages", description = "Returns a list of all messages")
     public ResponseEntity<PaginatedResponse<Message>> getAllMessages(
-            @PaginationParams PaginationRequest paginationRequest
+            @ModelAttribute PaginationRequest paginationRequest
     ) {
         return messageService.getAllMessages(paginationRequest);
     }

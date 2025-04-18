@@ -1,12 +1,11 @@
 package com.example.wodcrmapi.controller;
 
 import com.example.wodcrmapi.aop.CheckPermission;
-import com.example.wodcrmapi.aop.PaginationParams;
+import com.example.wodcrmapi.dto.request.CompanyFilterRequest;
 import com.example.wodcrmapi.dto.request.CreateCompanyRequest;
 import com.example.wodcrmapi.dto.request.PaginationRequest;
 import com.example.wodcrmapi.dto.response.CompanyResponse;
 import com.example.wodcrmapi.dto.response.PaginatedResponse;
-import com.example.wodcrmapi.entity.Company;
 import com.example.wodcrmapi.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,9 +32,10 @@ public class CompanyController {
     @CheckPermission(value = "COMPANY:READALL", description = "Get all companies", displayName = "Получение списка компаний")
     @Operation(summary = "Get all companies", description = "Returns a list of all companies")
     public ResponseEntity<PaginatedResponse<CompanyResponse>> getAllCompanies(
-            @PaginationParams PaginationRequest paginationRequest
+            @ModelAttribute PaginationRequest paginationParams,
+            @ModelAttribute CompanyFilterRequest companyFilterRequest
     ) {
-        return companyService.getAllCompanies(paginationRequest);
+        return companyService.getAllCompanies(paginationParams, companyFilterRequest);
     }
 
     @PostMapping

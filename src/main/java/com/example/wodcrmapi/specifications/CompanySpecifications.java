@@ -20,4 +20,13 @@ public class CompanySpecifications {
             );
         };
     }
+
+    public static Specification<Company> withStatus(Boolean active) {
+        return (root, query, cb) -> {
+            if (active == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("active"), active);
+        };
+    }
 }
