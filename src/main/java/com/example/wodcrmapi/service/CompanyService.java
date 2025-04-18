@@ -58,7 +58,7 @@ public class CompanyService {
 
         Company savedCompany = companyRepository.save(company);
 
-        return modelMapper.map(savedCompany, CompanyResponse.class);
+        return companyMapper.toResponse(savedCompany);
     }
 
     public CompanyResponse getCompanyById(Long id) {
@@ -83,9 +83,8 @@ public class CompanyService {
                     existingCompany.setDomain(company.getDomain());
                     // Add other fields as needed
                     Company updatedCompany = companyRepository.save(existingCompany);
-                    CompanyResponse companyResponse = modelMapper.map(updatedCompany, CompanyResponse.class);
 
-                    return companyResponse;
+                    return companyMapper.toResponse(updatedCompany);
                 })
                 .orElseThrow(() -> new NotFoundException("Company not found"));
     }

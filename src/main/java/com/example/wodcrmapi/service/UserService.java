@@ -1,7 +1,11 @@
 package com.example.wodcrmapi.service;
 
 import com.example.wodcrmapi.dto.request.CreateUserRequest;
+import com.example.wodcrmapi.dto.request.PaginationRequest;
+import com.example.wodcrmapi.dto.response.CompanyResponse;
+import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.dto.response.UserResponse;
+import com.example.wodcrmapi.entity.Company;
 import com.example.wodcrmapi.entity.Role;
 import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
@@ -9,8 +13,13 @@ import com.example.wodcrmapi.mapper.UserMapper;
 import com.example.wodcrmapi.repository.RoleRepository;
 import com.example.wodcrmapi.repository.UserRepository;
 import com.example.wodcrmapi.security.SecurityUtils;
+import com.example.wodcrmapi.specifications.CompanySpecifications;
+import com.example.wodcrmapi.specifications.UserSpecifications;
 import org.apache.coyote.BadRequestException;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -84,11 +93,13 @@ public class UserService {
         return userRepository.findByUsername(username).orElse(null);
     }
 
-    public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(userMapper::mapToUserResponse)
-                .collect(Collectors.toList());
+    public ResponseEntity<PaginatedResponse<UserResponse>> getAllUsers(PaginationRequest paginationRequest) {
+        Specification<User> spec = UserSpecifications.withSearch(paginationRequest.getSearch());
+        Page<User> pageResult = userRepository.findAll(spec, paginationRequest.toPageable());
+        Page<UserResponse> responsePage = pageResult
+                .map(userMapper::mapToUserResponse);
+
+        return ResponseEntity.ok(new PaginatedResponse<>(responsePage));
     }
 
     public UserResponse updateUser(Long id, CreateUserRequest request) {

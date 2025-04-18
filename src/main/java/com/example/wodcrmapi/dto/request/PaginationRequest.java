@@ -1,5 +1,6 @@
 package com.example.wodcrmapi.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -19,10 +20,26 @@ public class PaginationRequest {
     @Max(value = 100, message = "Page size must not exceed 100")
     private int size = 20;
 
+    @Schema(
+            example = "id",
+            description = "Optional search term to filter results",
+            nullable = true
+    )
     private String sortBy = "id";
+
+    @Schema(
+            example = "asc",
+            description = "Optional search term to filter results",
+            nullable = true
+    )
     private String sortDirection = "asc";
 
     @Size(max = 100, message = "Search term must not exceed 100 characters")
+    @Schema(
+            example = " ",
+            description = "Optional search term to filter results",
+            nullable = true
+    )
     private String search;
 
     public Pageable toPageable() {

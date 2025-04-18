@@ -1,11 +1,16 @@
 package com.example.wodcrmapi.controller;
 
 import com.example.wodcrmapi.aop.CheckPermission;
+import com.example.wodcrmapi.aop.PaginationParams;
 import com.example.wodcrmapi.dto.request.CreateUserRequest;
+import com.example.wodcrmapi.dto.request.PaginationRequest;
+import com.example.wodcrmapi.dto.response.CompanyResponse;
+import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.dto.response.UserResponse;
 import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.service.UserService;
 import org.apache.coyote.BadRequestException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,8 +30,10 @@ public class UserController {
     @GetMapping
     @CheckPermission(value = "USER:READALL", description = "GET all users", displayName = "Получение списка полльзователей")
     @Operation(summary = "Get all users", description = "Returns a list of all users")
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<PaginatedResponse<UserResponse>> getAllUsers(
+            @PaginationParams PaginationRequest paginationRequest
+    ) {
+        return userService.getAllUsers(paginationRequest);
     }
 
     @PostMapping
