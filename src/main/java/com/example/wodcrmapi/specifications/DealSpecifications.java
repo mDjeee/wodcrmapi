@@ -22,15 +22,6 @@ public class DealSpecifications {
         };
     }
 
-    public static Specification<Deal> withStatus(Boolean active) {
-        return (root, query, cb) -> {
-            if (active == null) {
-                return cb.conjunction();
-            }
-            return cb.equal(root.get("active"), active);
-        };
-    }
-
     public static Specification<Deal> withCompany(Long companyId) {
         return (root, query, cb) -> {
             if (companyId == null) {

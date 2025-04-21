@@ -12,7 +12,6 @@ public class DealResponse {
     private Integer billingDay;
     private Double price;
     private String currency;
-    private boolean active;
     private Long companyId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

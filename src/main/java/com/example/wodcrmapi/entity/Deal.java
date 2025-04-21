@@ -5,7 +5,6 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.stereotype.Indexed;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -37,9 +36,6 @@ public class Deal {
 
     @Column(nullable = false)
     private String currency;
-
-    @Column(nullable = false)
-    private boolean active = true;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)

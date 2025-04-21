@@ -7,9 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DealFilterRequest {
-    @Schema(description = "Filter by active status", example = "true", nullable = true)
-    private Boolean active;
-
     @Schema(description = "Filter by company ID", example = "1", nullable = true)
     private Long companyId;
 

@@ -15,6 +15,7 @@ import com.example.wodcrmapi.specifications.DealSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,15 +31,22 @@ public class DealService {
     private final DealMapper dealMapper;
 
     @Transactional
-    public DealResponse createDeal(DealRequest request) {
+    public ResponseEntity<DealResponse> createDeal(DealRequest request) {
         Company company = companyRepository.findById(request.getCompanyId())
                 .orElseThrow(() -> new NotFoundException("Company not found with id: " + request.getCompanyId()));
 
-        Deal deal = dealMapper.toEntity(request);
+        Deal deal = new Deal();
+        deal.setName(request.getName());
+        deal.setBillingDay(request.getBillingDay());
+        deal.setPrice(request.getPrice());
+        deal.setCurrency(request.getCurrency());
+        deal.setDurationMonths(request.getDurationMonths());
         deal.setCompany(company);
 
+
         Deal savedDeal = dealRepository.save(deal);
-        return dealMapper.toResponse(savedDeal);
+        DealResponse response = dealMapper.toResponse(savedDeal);
+        return ResponseEntity.ok(response);
     }
 
     public DealResponse getDealById(Long id) {
@@ -52,7 +60,6 @@ public class DealService {
             DealFilterRequest filterRequest) {
 
         Specification<Deal> spec = Specification.where(DealSpecifications.withSearch(paginationRequest.getSearch()))
-                .and(DealSpecifications.withStatus(filterRequest.getActive()))
                 .and(DealSpecifications.withCompany(filterRequest.getCompanyId()))
                 .and(DealSpecifications.withPriceRange(filterRequest.getMinPrice(), filterRequest.getMaxPrice()))
                 .and(DealSpecifications.withCurrency(filterRequest.getCurrency()));

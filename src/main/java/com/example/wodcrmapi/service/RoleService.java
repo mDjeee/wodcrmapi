@@ -1,11 +1,21 @@
 package com.example.wodcrmapi.service;
 
 import com.example.wodcrmapi.dto.request.CreateRoleRequest;
+import com.example.wodcrmapi.dto.request.PaginationRequest;
+import com.example.wodcrmapi.dto.response.ClientResponse;
+import com.example.wodcrmapi.dto.response.PaginatedResponse;
+import com.example.wodcrmapi.entity.Client;
 import com.example.wodcrmapi.entity.Permission;
 import com.example.wodcrmapi.entity.Role;
 import com.example.wodcrmapi.exception.NotFoundException;
 import com.example.wodcrmapi.repository.PermissionRepository;
 import com.example.wodcrmapi.repository.RoleRepository;
+import com.example.wodcrmapi.specifications.ClientSpecifications;
+import com.example.wodcrmapi.specifications.RoleSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +40,7 @@ public class RoleService {
      * @return the created role
      */
     @Transactional
-    public Role createRole(CreateRoleRequest request) {
+    public ResponseEntity<Role> createRole(CreateRoleRequest request) {
         Role role = new Role();
         role.setName(request.getName());
         role.setDisplayName(request.getDisplayName());
@@ -40,15 +50,20 @@ public class RoleService {
             role.setPermissions(permissions);
         }
 
-        return roleRepository.save(role);
+        return new ResponseEntity<>(roleRepository.save(role), HttpStatus.CREATED);
     }
 
     /**
      * Get all roles
      * @return list of all roles
      */
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
+    public ResponseEntity<PaginatedResponse<Role>> getAllRoles(
+            PaginationRequest paginationRequest
+    ) {
+        Specification<Role> spec = RoleSpecifications.withSearch(paginationRequest.getSearch());
+        Page<Role> pageResult = roleRepository.findAll(spec, paginationRequest.toPageable());
+
+        return ResponseEntity.ok(new PaginatedResponse<>(pageResult));
     }
 
     /**
@@ -58,8 +73,9 @@ public class RoleService {
      * @throws NotFoundException if role not found
      */
     public Role getRoleById(Long id) throws NotFoundException {
-        return roleRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Role not found with id: " + id));
+        Role role = roleRepository.findById(id).orElseThrow(() -> new NotFoundException("Role not found with id: " + id));
+
+        return role;
     }
 
     @Transactional
@@ -114,7 +130,7 @@ public class RoleService {
      * @throws NotFoundException if role not found
      */
     @Transactional
-    public Role updateRole(Long id, CreateRoleRequest roleDetails) throws NotFoundException {
+    public ResponseEntity<Role> updateRole(Long id, CreateRoleRequest roleDetails) throws NotFoundException {
         Role role = getRoleById(id);
 
         if(role == null) {
@@ -129,7 +145,9 @@ public class RoleService {
             role.setPermissions(permissions);
         }
 
-        return roleRepository.save(role);
+        Role updatedRole = roleRepository.save(role);
+
+        return new ResponseEntity<>(updatedRole, HttpStatus.OK);
     }
 
     /**

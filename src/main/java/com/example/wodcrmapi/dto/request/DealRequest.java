@@ -27,9 +27,6 @@ public class DealRequest {
     @Size(min = 3, max = 3, message = "Currency must be 3 characters")
     private String currency;
 
-    @NotNull(message = "Active status is required")
-    private Boolean active;
-
     @NotNull(message = "Company ID is required")
     private Long companyId;
 }

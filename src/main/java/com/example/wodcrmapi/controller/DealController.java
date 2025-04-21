@@ -31,7 +31,7 @@ public class DealController {
     @Operation(summary = "Create a new deal",
             description = "Creates a new deal with the specified parameters")
     public ResponseEntity<DealResponse> createDeal(@Valid @RequestBody DealRequest request) {
-        return new ResponseEntity<>(dealService.createDeal(request), HttpStatus.CREATED);
+        return dealService.createDeal(request);
     }
 
     @GetMapping("/{id}")
