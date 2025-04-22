@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,7 +51,9 @@ public class SuperUserService {
                 });
 
         user.getRoles().clear();
-        user.getRoles().add(superAdminRole);
+        Set<Role> roles = new HashSet<>();
+        roles.add(superAdminRole);
+        user.setRoles(roles);
 
         user.setPassword(passwordEncoder.encode("super123"));
         user.setFirstName("Islam");

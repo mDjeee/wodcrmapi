@@ -7,10 +7,12 @@ import com.example.wodcrmapi.dto.response.DealResponse;
 import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.entity.Company;
 import com.example.wodcrmapi.entity.Deal;
+import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
 import com.example.wodcrmapi.mapper.DealMapper;
 import com.example.wodcrmapi.repository.CompanyRepository;
 import com.example.wodcrmapi.repository.DealRepository;
+import com.example.wodcrmapi.security.SecurityUtils;
 import com.example.wodcrmapi.specifications.DealSpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,17 +32,22 @@ public class DealService {
     private final DealRepository dealRepository;
     private final CompanyRepository companyRepository;
     private final DealMapper dealMapper;
+    private final SecurityUtils securityUtils;
 
     @Transactional
     public ResponseEntity<DealResponse> createDeal(DealRequest request) {
-        Company company = companyRepository.findById(request.getCompanyId())
-                .orElseThrow(() -> new NotFoundException("Company not found with id: " + request.getCompanyId()));
+        User currentUser = securityUtils.getCurrentUser();
+
+        Long companyId = Optional.ofNullable(request.getCompanyId())
+                .orElseGet(currentUser::getCompanyId);
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new NotFoundException("Company not found with id: " + companyId));
+
 
         Deal deal = new Deal();
         deal.setName(request.getName());
-        deal.setBillingDay(request.getBillingDay());
         deal.setPrice(request.getPrice());
-        deal.setCurrency(request.getCurrency());
         deal.setDurationMonths(request.getDurationMonths());
         deal.setCompany(company);
 

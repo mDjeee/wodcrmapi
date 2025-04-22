@@ -24,6 +24,9 @@ public class Role {
     @Column(unique = true, nullable = false)
     private String displayName;
 
+    @Column
+    private Long companyId;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "role_permissions",

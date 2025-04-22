@@ -10,7 +10,6 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface DealMapper {
     @Mapping(target = "company", ignore = true) // Will be set manually in service
-    @Mapping(target = "clients", ignore = true) // Will be managed separately
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Deal toEntity(DealRequest dealRequest);
@@ -19,7 +18,6 @@ public interface DealMapper {
     DealResponse toResponse(Deal deal);
 
     @Mapping(target = "company", ignore = true)
-    @Mapping(target = "clients", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "id", ignore = true)

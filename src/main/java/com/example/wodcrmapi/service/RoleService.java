@@ -7,9 +7,11 @@ import com.example.wodcrmapi.dto.response.PaginatedResponse;
 import com.example.wodcrmapi.entity.Client;
 import com.example.wodcrmapi.entity.Permission;
 import com.example.wodcrmapi.entity.Role;
+import com.example.wodcrmapi.entity.User;
 import com.example.wodcrmapi.exception.NotFoundException;
 import com.example.wodcrmapi.repository.PermissionRepository;
 import com.example.wodcrmapi.repository.RoleRepository;
+import com.example.wodcrmapi.security.SecurityUtils;
 import com.example.wodcrmapi.specifications.ClientSpecifications;
 import com.example.wodcrmapi.specifications.RoleSpecifications;
 import org.springframework.data.domain.Page;
@@ -28,10 +30,16 @@ import java.util.stream.Collectors;
 public class RoleService {
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final SecurityUtils securityUtils;
 
-    public RoleService(RoleRepository roleRepository, PermissionRepository permissionRepository) {
+    public RoleService(
+            RoleRepository roleRepository,
+            PermissionRepository permissionRepository,
+            SecurityUtils securityUtils
+    ) {
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
+        this.securityUtils = securityUtils;
     }
 
     /**
@@ -41,9 +49,16 @@ public class RoleService {
      */
     @Transactional
     public ResponseEntity<Role> createRole(CreateRoleRequest request) {
+        User currentUser = securityUtils.getCurrentUser();
         Role role = new Role();
         role.setName(request.getName());
         role.setDisplayName(request.getDisplayName());
+
+        if(request.getCompanyId().describeConstable().isPresent()) {
+            role.setCompanyId(request.getCompanyId());
+        } else {
+            role.setCompanyId(currentUser.getCompanyId());
+        }
 
         if (request.getPermissions() != null && !request.getPermissions().isEmpty()) {
             Set<Permission> permissions = new HashSet<>(permissionRepository.findAllById(request.getPermissions()));

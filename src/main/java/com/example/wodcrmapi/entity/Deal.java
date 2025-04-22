@@ -29,20 +29,11 @@ public class Deal {
     private Integer durationMonths;
 
     @Column(nullable = false)
-    private Integer billingDay; // Day of month when billing occurs (1-31)
-
-    @Column(nullable = false)
     private Double price;
-
-    @Column(nullable = false)
-    private String currency;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
-
-    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Client> clients;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

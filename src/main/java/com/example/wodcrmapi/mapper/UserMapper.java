@@ -50,6 +50,7 @@ public class UserMapper {
         dto.setActionType(permission.getActionType());
         dto.setDisplayName(permission.getDisplayName());
         dto.setResource(permission.getResource());
+        dto.setIsSuper(permission.getIsSuper());
         return dto;
     }
 }

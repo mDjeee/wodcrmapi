@@ -24,6 +24,9 @@ public class Permission {
     @Column(name = "action_type", length = 50)
     private ActionType actionType;
 
+    @Column(name = "is_super")
+    private Boolean isSuper = false;
+
     private String displayName;
     private String resource;
 
@@ -37,7 +40,8 @@ public class Permission {
         EXPORT
     }
 
-    @PrePersist @PreUpdate
+    @PrePersist
+    @PreUpdate
     private void parseNameToEnums() {
         if (this.name != null) {
             String[] parts = this.name.split(":");

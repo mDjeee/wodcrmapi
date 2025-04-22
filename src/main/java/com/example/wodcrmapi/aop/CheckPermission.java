@@ -11,4 +11,5 @@ public @interface CheckPermission {
     String value(); // Example: "user:create"
     String description() default "";
     String displayName() default "";
+    String type() default "";
 }

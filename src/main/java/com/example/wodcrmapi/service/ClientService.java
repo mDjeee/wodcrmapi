@@ -70,6 +70,7 @@ public class ClientService {
             );
         }
 
+        User currentUser = securityUtils.getCurrentUser();
         Client client = new Client();
 
         client.setPhone(request.getPhone());
@@ -77,7 +78,10 @@ public class ClientService {
         client.setFirstName(request.getFirstName());
         client.setLastName(request.getLastName());
 
-        CompanyResponse company = companyService.getCompanyById(request.getCompanyId());
+        Long companyId = Optional.ofNullable(request.getCompanyId())
+                .orElseGet(currentUser::getCompanyId);
+
+        CompanyResponse company = companyService.getCompanyById(companyId);
 
         if(company == null) {
             throw new BadRequestException(
@@ -87,7 +91,6 @@ public class ClientService {
             client.setCompanyId(company.getId());
         }
 
-        User currentUser = securityUtils.getCurrentUser();
         client.setCreatedBy(currentUser);
 
         Client savedClient = repo.saveAndFlush(client);

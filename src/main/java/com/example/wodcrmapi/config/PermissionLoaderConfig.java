@@ -59,13 +59,14 @@ public class PermissionLoaderConfig implements ApplicationListener<ApplicationRe
         String name = annotation.value().toLowerCase(); // e.g., "user:create"
         String description = annotation.description();
         String displayName = annotation.displayName();
-        System.out.println("kjhkhkhj");
+        String type = annotation.type();
 
         Permission permission = permissionRepository.findByName(name).orElseGet(Permission::new);
 
         permission.setName(name);
         permission.setDescription(description);
         permission.setDisplayName(displayName);
+        permission.setIsSuper(checkSuper(type));
 
         String[] parts = name.split(":");
         if (parts.length == 2) {
@@ -84,4 +85,8 @@ public class PermissionLoaderConfig implements ApplicationListener<ApplicationRe
         } catch (Exception e) {
             System.err.println("Failed to save permission " + name + ": " + e.getMessage());
         }    }
+
+    private Boolean checkSuper(String type) {
+        return "admin".equals(type);
+    }
 }

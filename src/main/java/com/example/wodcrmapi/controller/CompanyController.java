@@ -27,7 +27,12 @@ public class CompanyController {
     }
 
     @GetMapping
-    @CheckPermission(value = "COMPANY:READALL", description = "Get all companies", displayName = "Получение списка компаний")
+    @CheckPermission(
+            value = "COMPANY:READALL",
+            description = "Get all companies",
+            displayName = "Получение списка компаний",
+            type = "admin"
+    )
     @Operation(summary = "Get all companies", description = "Returns a list of all companies")
     public ResponseEntity<PaginatedResponse<CompanyResponse>> getAllCompanies(
             @ModelAttribute PaginationRequest paginationParams,
@@ -37,28 +42,48 @@ public class CompanyController {
     }
 
     @PostMapping
-    @CheckPermission(value = "COMPANY:CREATE", description = "Create company", displayName = "Добавление компаний")
+    @CheckPermission(
+            value = "COMPANY:CREATE",
+            description = "Create company",
+            displayName = "Добавление компаний",
+            type = "admin"
+    )
     @Operation(summary = "Create a new company", description = "Adds a new company")
     public CompanyResponse createCompany(@Valid @RequestBody CreateCompanyRequest request) throws BadRequestException {
         return companyService.createCompany(request);
     }
 
     @GetMapping("/{id}")
-    @CheckPermission(value = "COMPANY:READ", description = "Get company", displayName = "Получение компаний")
+    @CheckPermission(
+            value = "COMPANY:READ",
+            description = "Get company",
+            displayName = "Получение компаний",
+            type = "admin"
+    )
     @Operation(summary = "Get company by id", description = "Returns company by ID")
     public CompanyResponse getCompanyById(@PathVariable Long id) {
         return companyService.getCompanyById(id);
     }
 
     @PutMapping("/{id}")
-    @CheckPermission(value = "COMPANY:UPDATE", description = "Update company", displayName = "Обновление компаний")
+    @CheckPermission(
+            value = "COMPANY:UPDATE",
+            description = "Update company",
+            displayName = "Обновление компаний",
+            type = "admin"
+    )
     @Operation(summary = "Update company by id", description = "Updates and returns company")
     public CompanyResponse updateCompany(@PathVariable Long id, @RequestBody CreateCompanyRequest company) {
         return companyService.updateCompany(id, company);
     }
 
     @DeleteMapping("/{id}")
-    @CheckPermission(value = "COMPANY:DELETE", description = "Delete company", displayName = "Удаление компаний")
+    @CheckPermission(
+            value = "COMPANY:DELETE",
+            description = "Delete company",
+            displayName = "Удаление компаний",
+            type = "admin"
+    )
     @Operation(summary = "Delete company by id", description = "Deletes company by ID")
     public void deleteCompany(@PathVariable Long id) {
         companyService.deleteCompany(id);
